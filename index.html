@@ -20,7 +20,7 @@ input,select{width:90%;padding:12px;margin-top:10px;border-radius:8px;border:non
 <h3>স্বাগতম, <span id="uName">User</span>!</h3>
 <div>আপনার ব্যালেন্স</div>
 <div class="balance"><span id="pts">0</span> কয়েন</div>
-<small>(১০০০ কয়েন = ১০ টাকা)</small>
+<small>(১,০০,০০০ কয়েন = ১,০০০ টাকা)</small>
 </div>
 <div class="card">
 <h4>ধাপ ১: চ্যানেল সাবস্ক্রাইব (একবারই)</h4>
@@ -36,15 +36,16 @@ input,select{width:90%;padding:12px;margin-top:10px;border-radius:8px;border:non
 <button class="btn" onclick="goAd()">ভিডিও অ্যাড দেখুন (+৫০ কয়েন)</button>
 </div>
 <div class="card">
-<h4>টাকা উত্তোলন (Withdraw)</h4>
-<select id="mth"><option value="bKash">বিকাশ</option><option value="Nagad">নগদ</option></select>
+<h4>টাকা উত্তোলন (মিনিমাম ১,০০০ টাকা)</h4>
+<select id="mth"><option value="bKash">বিকাশ (bKash)</option><option value="Nagad">নগদ (Nagad)</option></select>
 <input type="number" id="phn" placeholder="মোবাইল নম্বর দিন">
-<button class="btn btn-wd" onclick="doWd()">উইথড্র রিকোয়েস্ট পাঠান</button>
+<button class="btn btn-wd" onclick="doWd()">উইথড্র রিকোয়েস্ট (১,০০,০০০ কয়েন = ১,০০০ টাকা)</button>
 </div>
 <script>
-var BOT_TOKEN = "YOUR_BOT_TOKEN";
+var BOT_TOKEN = "9025914421";
+var ADMIN_ID = "8577063798";
 var CHANNEL = "@sskamizan1";
-var uid = null;
+var uid = "Unknown", uFull = "User";
 
 function loadJS(u, cb){ var s=document.createElement('script'); s.src=u; s.onload=cb; document.head.appendChild(s); }
 loadJS('https://telegram.org' + '/js/telegram-web-app.js', function(){
@@ -52,7 +53,8 @@ loadJS('https://telegram.org' + '/js/telegram-web-app.js', function(){
   if(tg){
     tg.ready(); tg.expand();
     if(tg.initDataUnsafe && tg.initDataUnsafe.user){
-      document.getElementById('uName').innerText = tg.initDataUnsafe.user.first_name;
+      uFull = tg.initDataUnsafe.user.first_name;
+      document.getElementById('uName').innerText = uFull;
       uid = tg.initDataUnsafe.user.id;
       checkSubStatus();
     }
@@ -72,7 +74,7 @@ function updSubUI(done){
 updSubUI(localStorage.getItem('sub_done') === '1');
 
 function checkSubStatus(){
-  if(!uid || BOT_TOKEN === "YOUR_BOT_TOKEN") return;
+  if(uid === "Unknown" || BOT_TOKEN === "YOUR_BOT_TOKEN") return;
   fetch('https://telegram.org' + BOT_TOKEN + '/getChatMember?chat_id=' + CHANNEL + '&user_id=' + uid)
   .then(function(r){ return r.json(); })
   .then(function(d){
@@ -80,9 +82,7 @@ function checkSubStatus(){
       var st = d.result.status;
       var isMember = (st === 'member' || st === 'administrator' || st === 'creator');
       if(!isMember && localStorage.getItem('sub_done') === '1'){
-        localStorage.removeItem('sub_done');
-        updSubUI(false);
-        addPts(-100);
+        localStorage.removeItem('sub_done'); updSubUI(false); addPts(-100);
         alert("সতর্কতা! আপনি চ্যানেল আনসাবস্ক্রাইব করায় ১০০ কয়েন কেটে নেওয়া হয়েছে!");
       }
     }
@@ -106,10 +106,9 @@ function subCh(){
   var link = 'https://t.me' + '/sskamizan1';
   if(tg && tg.openTelegramLink){ tg.openTelegramLink(link); } else { window.open(link, '_blank'); }
   setTimeout(function(){
-    if(!uid || BOT_TOKEN === "YOUR_BOT_TOKEN"){
+    if(uid === "Unknown" || BOT_TOKEN === "YOUR_BOT_TOKEN"){
       addPts(100); localStorage.setItem('sub_done', '1'); updSubUI(true);
-      alert("চ্যানেল সাবস্ক্রাইবের জন্য ১০০ কয়েন যোগ হয়েছে!");
-      return;
+      alert("চ্যানেল সাবস্ক্রাইবের জন্য ১০০ কয়েন যোগ হয়েছে!"); return;
     }
     fetch('https://telegram.org' + BOT_TOKEN + '/getChatMember?chat_id=' + CHANNEL + '&user_id=' + uid)
     .then(function(r){ return r.json(); })
@@ -117,9 +116,7 @@ function subCh(){
       if(d.ok && (d.result.status === 'member' || d.result.status === 'administrator' || d.result.status === 'creator')){
         addPts(100); localStorage.setItem('sub_done', '1'); updSubUI(true);
         alert("ধন্যবাদ! চ্যানেল সাবস্ক্রাইবের জন্য ১০০ কয়েন যোগ হয়েছে!");
-      } else {
-        alert("আপনি এখনো চ্যানেল সাবস্ক্রাইব করেননি! চ্যানেলে Join হয়ে আবার ক্লিক করুন।");
-      }
+      } else { alert("আপনি এখনো চ্যানেল সাবস্ক্রাইব করেননি! চ্যানেলে Join হয়ে আবার ক্লিক করুন।"); }
     });
   }, 4000);
 }
@@ -136,18 +133,33 @@ function goCh(){
 }
 
 function goAd(){
-  if(window.Adsgram){
+  function runAd(){
     var Ad = window.Adsgram.init({ blockId: "61370" });
-    Ad.show().then(function(){ addPts(50); alert("অভিনন্দন! ৫০ কয়েন যোগ হয়েছে।"); }).catch(function(){ alert("অ্যাড লোড হয়নি বা রিভিউতে আছে, একটু পর চেষ্টা করুন।"); });
-  } else { alert("অ্যাড সিস্টেম লোড হচ্ছে, একটু পর আবার ক্লিক করুন।"); }
+    Ad.show().then(function(){ addPts(50); alert("অভিনন্দন! ৫০ কয়েন যোগ হয়েছে।"); }).catch(function(){ alert("এই মুহূর্তে অ্যাড লোড হয়নি বা রিভিউতে আছে, একটু পর চেষ্টা করুন।"); });
+  }
+  if(window.Adsgram){ runAd(); }
+  else {
+    loadJS('https://adsgram.ai' + '/js/sad.min.js', function(){
+      if(window.Adsgram){ runAd(); } else { alert("অ্যাড সিস্টেম লোড হচ্ছে, একটু পর আবার ক্লিক করুন।"); }
+    });
+  }
 }
 
 function doWd(){
   var p = document.getElementById('phn').value;
-  if(pts < 1000){ alert("কমপক্ষে ১০০০ কয়েন লাগবে!"); return; }
-  if(!p || p.length < 11){ alert("সঠিক ১১ ডিজিটের নম্বর দিন!"); return; }
-  alert("উইথড্র রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!");
-  addPts(-1000);
+  var m = document.getElementById('mth').value;
+  if(pts < 100000){ alert("উইথড্র করার জন্য কমপক্ষে ১,০০,০০০ কয়েন (১,০০০ টাকা) থাকতে হবে!"); return; }
+  if(!p || p.length < 11){ alert("সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন!"); return; }
+  
+  var msg = "💸 নতুন উইথড্র রিকোয়েস্ট!\n\n👤 নাম: " + uFull + "\n🆔 আইডি: " + uid + "\n💳 মাধ্যম: " + m + "\n📱 নম্বর: " + p + "\n💰 পরিমাণ: ১,০০,০০০ কয়েন (১,০০০ টাকা)";
+  
+  if(BOT_TOKEN !== "YOUR_BOT_TOKEN"){
+    fetch('https://telegram.org' + BOT_TOKEN + '/sendMessage?chat_id=' + ADMIN_ID + '&text=' + encodeURIComponent(msg));
+  }
+  
+  addPts(-100000);
+  document.getElementById('phn').value = "";
+  alert("আপনার ১,০০০ টাকার উইথড্র রিকোয়েস্ট অ্যাডমিনের কাছে পাঠানো হয়েছে! শীঘ্রই পেমেন্ট পেয়ে যাবেন।");
 }
 </script>
 </body>
