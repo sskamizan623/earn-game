@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Video Watch & Earn</title>
-<script src="https://telegram.org"></script>
-<script src="https://adsgram.ai"></script>
 <style>
 body{font-family:sans-serif;background:#0f172a;color:#fff;text-align:center;padding:15px;margin:0}
 .card{background:#1e293b;border-radius:15px;padding:20px;margin-bottom:15px}
@@ -38,24 +36,31 @@ input,select{width:90%;padding:12px;margin-top:10px;border-radius:8px;border:non
 <button class="btn btn-wd" onclick="doWd()">উইথড্র রিকোয়েস্ট পাঠান</button>
 </div>
 <script>
-const tg = window.Telegram && window.Telegram.WebApp;
-if(tg){ tg.ready(); tg.expand(); if(tg.initDataUnsafe && tg.initDataUnsafe.user){ document.getElementById('uName').innerText = tg.initDataUnsafe.user.first_name; } }
-let pts = parseInt(localStorage.getItem('pts')) || 0;
+function loadJS(u, cb){ var s=document.createElement('script'); s.src=u; s.onload=cb; document.head.appendChild(s); }
+loadJS('https://telegram.org' + '/js/telegram-web-app.js', function(){
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if(tg){ tg.ready(); tg.expand(); if(tg.initDataUnsafe && tg.initDataUnsafe.user){ document.getElementById('uName').innerText = tg.initDataUnsafe.user.first_name; } }
+});
+loadJS('https://adsgram.ai' + '/js/sad.min.js');
+
+var pts = parseInt(localStorage.getItem('pts')) || 0;
 document.getElementById('pts').innerText = pts;
 function addPts(n){ pts += n; localStorage.setItem('pts', pts); document.getElementById('pts').innerText = pts; }
+
 function goCh(){
-  if(tg && tg.openTelegramLink){ tg.openTelegramLink("https://t.me"); }
-  else { window.open("https://t.me", "_blank"); }
-  setTimeout(()=>{ addPts(20); alert("চ্যানেল ভিজিটের জন্য ২০ কয়েন যোগ হয়েছে!"); }, 2000);
+  var tg = window.Telegram && window.Telegram.WebApp;
+  var link = 'https://t.me' + '/sskamizan1';
+  if(tg && tg.openTelegramLink){ tg.openTelegramLink(link); } else { window.open(link, '_blank'); }
+  setTimeout(function(){ addPts(20); alert("চ্যানেল ভিজিটের জন্য ২০ কয়েন যোগ হয়েছে!"); }, 2000);
 }
 function goAd(){
   if(window.Adsgram){
-    const Ad = window.Adsgram.init({ blockId: "61370" });
-    Ad.show().then(()=>{ addPts(50); alert("অভিনন্দন! ৫০ কয়েন যোগ হয়েছে।"); }).catch(()=>{ alert("অ্যাড লোড হয়নি বা রিভিউতে আছে, একটু পর চেষ্টা করুন।"); });
-  } else { alert("অ্যাড সিস্টেম লোড হচ্ছে, পেজ রিফ্রেশ করে আবার চেষ্টা করুন।"); }
+    var Ad = window.Adsgram.init({ blockId: "61370" });
+    Ad.show().then(function(){ addPts(50); alert("অভিনন্দন! ৫০ কয়েন যোগ হয়েছে।"); }).catch(function(){ alert("অ্যাড লোড হয়নি বা রিভিউতে আছে, একটু পর চেষ্টা করুন।"); });
+  } else { alert("অ্যাড সিস্টেম লোড হচ্ছে, একটু পর আবার ক্লিক করুন।"); }
 }
 function doWd(){
-  const p = document.getElementById('phn').value;
+  var p = document.getElementById('phn').value;
   if(pts < 1000){ alert("কমপক্ষে ১০০০ কয়েন লাগবে!"); return; }
   if(!p || p.length < 11){ alert("সঠিক ১১ ডিজিটের নম্বর দিন!"); return; }
   alert("উইথড্র রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!");
