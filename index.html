@@ -47,42 +47,52 @@ var ADMIN_ID = "8577063798";
 var CHANNEL = "@sskamizan1";
 var uid = "Unknown", uFull = "User";
 
-function loadJS(u, cb){ var s=document.createElement('script'); s.src=u; s.onload=cb; document.head.appendChild(s); }
-loadJS('https://telegram.org' + '/js/telegram-web-app.js', function(){
+var TG_API = "https://" + "api.telegram.org" + "/bot" + BOT_TOKEN;
+var CH_LINK = "https://" + "t.me" + "/sskamizan1";
+
+function addScript(src, cb){
+  var s = document.createElement("script");
+  s.src = src;
+  if(cb) s.onload = cb;
+  document.head.appendChild(s);
+}
+
+addScript("https://" + "telegram.org" + "/js/" + "telegram-web-app.js", function(){
   var tg = window.Telegram && window.Telegram.WebApp;
   if(tg){
     tg.ready(); tg.expand();
     if(tg.initDataUnsafe && tg.initDataUnsafe.user){
       uFull = tg.initDataUnsafe.user.first_name;
-      document.getElementById('uName').innerText = uFull;
+      document.getElementById("uName").innerText = uFull;
       uid = tg.initDataUnsafe.user.id;
       checkSubStatus();
     }
   }
 });
-loadJS('https://adsgram.ai' + '/js/sad.min.js');
 
-var pts = parseInt(localStorage.getItem('pts')) || 0;
-document.getElementById('pts').innerText = pts;
-function addPts(n){ pts = Math.max(0, pts + n); localStorage.setItem('pts', pts); document.getElementById('pts').innerText = pts; }
+addScript("https://" + "sad." + "adsgram.ai" + "/js/" + "sad.min.js");
+
+var pts = parseInt(localStorage.getItem("pts")) || 0;
+document.getElementById("pts").innerText = pts;
+function addPts(n){ pts = Math.max(0, pts + n); localStorage.setItem("pts", pts); document.getElementById("pts").innerText = pts; }
 
 function updSubUI(done){
-  var sb = document.getElementById('subBtn');
+  var sb = document.getElementById("subBtn");
   if(done){ sb.innerText = "সাবস্ক্রাইব সম্পন্ন হয়েছে ✓"; sb.style.background = "#475569"; }
   else { sb.innerText = "চ্যানেল সাবস্ক্রাইব করুন (+১০০ কয়েন)"; sb.style.background = "#8b5cf6"; }
 }
-updSubUI(localStorage.getItem('sub_done') === '1');
+updSubUI(localStorage.getItem("sub_done") === "1");
 
 function checkSubStatus(){
   if(uid === "Unknown" || BOT_TOKEN === "YOUR_BOT_TOKEN") return;
-  fetch('https://telegram.org' + BOT_TOKEN + '/getChatMember?chat_id=' + CHANNEL + '&user_id=' + uid)
+  fetch(TG_API + "/getChatMember?chat_id=" + CHANNEL + "&user_id=" + uid)
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(d.ok){
       var st = d.result.status;
-      var isMember = (st === 'member' || st === 'administrator' || st === 'creator');
-      if(!isMember && localStorage.getItem('sub_done') === '1'){
-        localStorage.removeItem('sub_done'); updSubUI(false); addPts(-100);
+      var isMember = (st === "member" || st === "administrator" || st === "creator");
+      if(!isMember && localStorage.getItem("sub_done") === "1"){
+        localStorage.removeItem("sub_done"); updSubUI(false); addPts(-100);
         alert("সতর্কতা! আপনি চ্যানেল আনসাবস্ক্রাইব করায় ১০০ কয়েন কেটে নেওয়া হয়েছে!");
       }
     }
@@ -90,10 +100,10 @@ function checkSubStatus(){
 }
 
 var today = new Date().toDateString();
-if(localStorage.getItem('ch_date') !== today){ localStorage.setItem('ch_date', today); localStorage.setItem('ch_cnt', '0'); }
-var chCnt = parseInt(localStorage.getItem('ch_cnt')) || 0;
+if(localStorage.getItem("ch_date") !== today){ localStorage.setItem("ch_date", today); localStorage.setItem("ch_cnt", "0"); }
+var chCnt = parseInt(localStorage.getItem("ch_cnt")) || 0;
 function updChBtn(){
-  var cb = document.getElementById('chBtn');
+  var cb = document.getElementById("chBtn");
   var rem = 5 - chCnt;
   if(rem <= 0){ cb.innerText = "আজকের ভিজিট শেষ (আগামীকাল আবার)"; cb.style.background = "#475569"; }
   else { cb.innerText = "চ্যানেলে যান (+২০ কয়েন) [" + rem + "/৫ বাকি]"; }
@@ -101,20 +111,19 @@ function updChBtn(){
 updChBtn();
 
 function subCh(){
-  if(localStorage.getItem('sub_done') === '1'){ alert("আপনি ইতিমধ্যে সাবস্ক্রাইব বোনাস নিয়েছেন!"); return; }
+  if(localStorage.getItem("sub_done") === "1"){ alert("আপনি ইতিমধ্যে সাবস্ক্রাইব বোনাস নিয়েছেন!"); return; }
   var tg = window.Telegram && window.Telegram.WebApp;
-  var link = 'https://t.me' + '/sskamizan1';
-  if(tg && tg.openTelegramLink){ tg.openTelegramLink(link); } else { window.open(link, '_blank'); }
+  if(tg && tg.openTelegramLink){ tg.openTelegramLink(CH_LINK); } else { window.open(CH_LINK, "_blank"); }
   setTimeout(function(){
     if(uid === "Unknown" || BOT_TOKEN === "YOUR_BOT_TOKEN"){
-      addPts(100); localStorage.setItem('sub_done', '1'); updSubUI(true);
+      addPts(100); localStorage.setItem("sub_done", "1"); updSubUI(true);
       alert("চ্যানেল সাবস্ক্রাইবের জন্য ১০০ কয়েন যোগ হয়েছে!"); return;
     }
-    fetch('https://telegram.org' + BOT_TOKEN + '/getChatMember?chat_id=' + CHANNEL + '&user_id=' + uid)
+    fetch(TG_API + "/getChatMember?chat_id=" + CHANNEL + "&user_id=" + uid)
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if(d.ok && (d.result.status === 'member' || d.result.status === 'administrator' || d.result.status === 'creator')){
-        addPts(100); localStorage.setItem('sub_done', '1'); updSubUI(true);
+      if(d.ok && (d.result.status === "member" || d.result.status === "administrator" || d.result.status === "creator")){
+        addPts(100); localStorage.setItem("sub_done", "1"); updSubUI(true);
         alert("ধন্যবাদ! চ্যানেল সাবস্ক্রাইবের জন্য ১০০ কয়েন যোগ হয়েছে!");
       } else { alert("আপনি এখনো চ্যানেল সাবস্ক্রাইব করেননি! চ্যানেলে Join হয়ে আবার ক্লিক করুন।"); }
     });
@@ -124,10 +133,9 @@ function subCh(){
 function goCh(){
   if(chCnt >= 5){ alert("আজকের জন্য সর্বোচ্চ ৫ বার ভিজিট শেষ! আগামীকাল আবার চেষ্টা করুন।"); return; }
   var tg = window.Telegram && window.Telegram.WebApp;
-  var link = 'https://t.me' + '/sskamizan1';
-  if(tg && tg.openTelegramLink){ tg.openTelegramLink(link); } else { window.open(link, '_blank'); }
+  if(tg && tg.openTelegramLink){ tg.openTelegramLink(CH_LINK); } else { window.open(CH_LINK, "_blank"); }
   setTimeout(function(){
-    chCnt++; localStorage.setItem('ch_cnt', chCnt); updChBtn();
+    chCnt++; localStorage.setItem("ch_cnt", chCnt); updChBtn();
     addPts(20); alert("চ্যানেল ভিজিটের জন্য ২০ কয়েন যোগ হয়েছে! (আজ " + chCnt + "/৫ বার সম্পন্ন)");
   }, 2000);
 }
@@ -139,27 +147,28 @@ function goAd(){
       addPts(50);
       alert("অভিনন্দন! ৫০ কয়েন যোগ হয়েছে।");
     }).catch(function(err){
-      alert("Adsgram অ্যাড এখনো রিভিউতে আছে অথবা এই মুহূর্তে অ্যাড খালি নেই। কিছুক্ষণ পর আবার চেষ্টা করুন!");
+      var msg = (err && err.description) ? err.description : "Adsgram ব্লকটি এখনো রিভিউতে (Created) আছে অথবা এই মুহূর্তে অ্যাড খালি নেই।";
+      alert("বিজ্ঞপ্তি: " + msg);
     });
   } else {
-    alert("ইন্টারনেট স্লো থাকার কারণে অ্যাড সিস্টেম লোড হয়নি। পেজটি Reload করে আবার চেষ্টা করুন!");
+    alert("অ্যাড স্ক্রিপ্ট এখনো লোড হচ্ছে। কয়েক সেকেন্ড অপেক্ষা করে আবার চাপ দিন!");
   }
 }
 
 function doWd(){
-  var p = document.getElementById('phn').value;
-  var m = document.getElementById('mth').value;
+  var p = document.getElementById("phn").value;
+  var m = document.getElementById("mth").value;
   if(pts < 100000){ alert("উইথড্র করার জন্য কমপক্ষে ১,০০,০০০ কয়েন (১,০০০ টাকা) থাকতে হবে!"); return; }
   if(!p || p.length < 11){ alert("সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন!"); return; }
   
   var msg = "💸 নতুন উইথড্র রিকোয়েস্ট!\n\n👤 নাম: " + uFull + "\n🆔 আইডি: " + uid + "\n💳 মাধ্যম: " + m + "\n📱 নম্বর: " + p + "\n💰 পরিমাণ: ১,০০,০০০ কয়েন (১,০০০ টাকা)";
   
   if(BOT_TOKEN !== "YOUR_BOT_TOKEN"){
-    fetch('https://telegram.org' + BOT_TOKEN + '/sendMessage?chat_id=' + ADMIN_ID + '&text=' + encodeURIComponent(msg));
+    fetch(TG_API + "/sendMessage?chat_id=" + ADMIN_ID + "&text=" + encodeURIComponent(msg));
   }
   
   addPts(-100000);
-  document.getElementById('phn').value = "";
+  document.getElementById("phn").value = "";
   alert("আপনার ১,০০০ টাকার উইথড্র রিকোয়েস্ট অ্যাডমিনের কাছে পাঠানো হয়েছে! শীঘ্রই পেমেন্ট পেয়ে যাবেন।");
 }
 </script>
