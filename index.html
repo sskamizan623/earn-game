@@ -6,9 +6,10 @@
 <title>Video Watch & Earn</title>
 <style>
 body{font-family:sans-serif;background:#0f172a;color:#fff;text-align:center;padding:15px;margin:0}
-.card{background:#1e293b;border-radius:15px;padding:20px;margin-bottom:15px}
-.balance{font-size:28px;font-weight:bold;color:#38bdf8;margin:10px 0}
-.btn{background:#2563eb;color:#fff;border:none;padding:14px;font-size:16px;font-weight:bold;border-radius:10px;width:100%;margin-top:10px;cursor:pointer}
+.card{background:#1e293b;border-radius:15px;padding:18px;margin-bottom:14px}
+.balance{font-size:28px;font-weight:bold;color:#38bdf8;margin:8px 0}
+.btn{background:#2563eb;color:#fff;border:none;padding:14px;font-size:15px;font-weight:bold;border-radius:10px;width:100%;margin-top:8px;cursor:pointer}
+.btn-sub{background:#8b5cf6}
 .btn-ch{background:#10b981}
 .btn-wd{background:#f59e0b;color:#000}
 input,select{width:90%;padding:12px;margin-top:10px;border-radius:8px;border:none;font-size:15px}
@@ -22,11 +23,16 @@ input,select{width:90%;padding:12px;margin-top:10px;border-radius:8px;border:non
 <small>(১০০০ কয়েন = ১০ টাকা)</small>
 </div>
 <div class="card">
-<h4>ধাপ ১: চ্যানেল ভিজিট ও পোস্ট দেখুন</h4>
-<button class="btn btn-ch" onclick="goCh()">চ্যানেলে যান (+২০ কয়েন)</button>
+<h4>ধাপ ১: চ্যানেল সাবস্ক্রাইব (একবারই)</h4>
+<p style="font-size:12px;color:#cbd5e1;margin:4px 0">আনসাবস্ক্রাইব করলে ১০০ কয়েন কেটে নেওয়া হবে</p>
+<button class="btn btn-sub" id="subBtn" onclick="subCh()">চ্যানেল সাবস্ক্রাইব করুন (+১০০ কয়েন)</button>
 </div>
 <div class="card">
-<h4>ধাপ ২: ভিডিও দেখুন ও স্পিন করুন</h4>
+<h4>ধাপ ২: চ্যানেল ভিজিট (দিনে সর্বোচ্চ ৫ বার)</h4>
+<button class="btn btn-ch" id="chBtn" onclick="goCh()">চ্যানেলে যান (+২০ কয়েন)</button>
+</div>
+<div class="card">
+<h4>ধাপ ৩: ভিডিও দেখুন ও আয় করুন (আনলিমিটেড)</h4>
 <button class="btn" onclick="goAd()">ভিডিও অ্যাড দেখুন (+৫০ কয়েন)</button>
 </div>
 <div class="card">
@@ -36,35 +42,112 @@ input,select{width:90%;padding:12px;margin-top:10px;border-radius:8px;border:non
 <button class="btn btn-wd" onclick="doWd()">উইথড্র রিকোয়েস্ট পাঠান</button>
 </div>
 <script>
+var BOT_TOKEN = "YOUR_BOT_TOKEN";
+var CHANNEL = "@sskamizan1";
+var uid = null;
+
 function loadJS(u, cb){ var s=document.createElement('script'); s.src=u; s.onload=cb; document.head.appendChild(s); }
 loadJS('https://telegram.org' + '/js/telegram-web-app.js', function(){
   var tg = window.Telegram && window.Telegram.WebApp;
-  if(tg){ tg.ready(); tg.expand(); if(tg.initDataUnsafe && tg.initDataUnsafe.user){ document.getElementById('uName').innerText = tg.initDataUnsafe.user.first_name; } }
+  if(tg){
+    tg.ready(); tg.expand();
+    if(tg.initDataUnsafe && tg.initDataUnsafe.user){
+      document.getElementById('uName').innerText = tg.initDataUnsafe.user.first_name;
+      uid = tg.initDataUnsafe.user.id;
+      checkSubStatus();
+    }
+  }
 });
 loadJS('https://adsgram.ai' + '/js/sad.min.js');
 
 var pts = parseInt(localStorage.getItem('pts')) || 0;
 document.getElementById('pts').innerText = pts;
-function addPts(n){ pts += n; localStorage.setItem('pts', pts); document.getElementById('pts').innerText = pts; }
+function addPts(n){ pts = Math.max(0, pts + n); localStorage.setItem('pts', pts); document.getElementById('pts').innerText = pts; }
 
-function goCh(){
+function updSubUI(done){
+  var sb = document.getElementById('subBtn');
+  if(done){ sb.innerText = "সাবস্ক্রাইব সম্পন্ন হয়েছে ✓"; sb.style.background = "#475569"; }
+  else { sb.innerText = "চ্যানেল সাবস্ক্রাইব করুন (+১০০ কয়েন)"; sb.style.background = "#8b5cf6"; }
+}
+updSubUI(localStorage.getItem('sub_done') === '1');
+
+function checkSubStatus(){
+  if(!uid || BOT_TOKEN === "YOUR_BOT_TOKEN") return;
+  fetch('https://telegram.org' + BOT_TOKEN + '/getChatMember?chat_id=' + CHANNEL + '&user_id=' + uid)
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.ok){
+      var st = d.result.status;
+      var isMember = (st === 'member' || st === 'administrator' || st === 'creator');
+      if(!isMember && localStorage.getItem('sub_done') === '1'){
+        localStorage.removeItem('sub_done');
+        updSubUI(false);
+        addPts(-100);
+        alert("সতর্কতা! আপনি চ্যানেল আনসাবস্ক্রাইব করায় ১০০ কয়েন কেটে নেওয়া হয়েছে!");
+      }
+    }
+  });
+}
+
+var today = new Date().toDateString();
+if(localStorage.getItem('ch_date') !== today){ localStorage.setItem('ch_date', today); localStorage.setItem('ch_cnt', '0'); }
+var chCnt = parseInt(localStorage.getItem('ch_cnt')) || 0;
+function updChBtn(){
+  var cb = document.getElementById('chBtn');
+  var rem = 5 - chCnt;
+  if(rem <= 0){ cb.innerText = "আজকের ভিজিট শেষ (আগামীকাল আবার)"; cb.style.background = "#475569"; }
+  else { cb.innerText = "চ্যানেলে যান (+২০ কয়েন) [" + rem + "/৫ বাকি]"; }
+}
+updChBtn();
+
+function subCh(){
+  if(localStorage.getItem('sub_done') === '1'){ alert("আপনি ইতিমধ্যে সাবস্ক্রাইব বোনাস নিয়েছেন!"); return; }
   var tg = window.Telegram && window.Telegram.WebApp;
   var link = 'https://t.me' + '/sskamizan1';
   if(tg && tg.openTelegramLink){ tg.openTelegramLink(link); } else { window.open(link, '_blank'); }
-  setTimeout(function(){ addPts(20); alert("চ্যানেল ভিজিটের জন্য ২০ কয়েন যোগ হয়েছে!"); }, 2000);
+  setTimeout(function(){
+    if(!uid || BOT_TOKEN === "YOUR_BOT_TOKEN"){
+      addPts(100); localStorage.setItem('sub_done', '1'); updSubUI(true);
+      alert("চ্যানেল সাবস্ক্রাইবের জন্য ১০০ কয়েন যোগ হয়েছে!");
+      return;
+    }
+    fetch('https://telegram.org' + BOT_TOKEN + '/getChatMember?chat_id=' + CHANNEL + '&user_id=' + uid)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d.ok && (d.result.status === 'member' || d.result.status === 'administrator' || d.result.status === 'creator')){
+        addPts(100); localStorage.setItem('sub_done', '1'); updSubUI(true);
+        alert("ধন্যবাদ! চ্যানেল সাবস্ক্রাইবের জন্য ১০০ কয়েন যোগ হয়েছে!");
+      } else {
+        alert("আপনি এখনো চ্যানেল সাবস্ক্রাইব করেননি! চ্যানেলে Join হয়ে আবার ক্লিক করুন।");
+      }
+    });
+  }, 4000);
 }
+
+function goCh(){
+  if(chCnt >= 5){ alert("আজকের জন্য সর্বোচ্চ ৫ বার ভিজিট শেষ! আগামীকাল আবার চেষ্টা করুন।"); return; }
+  var tg = window.Telegram && window.Telegram.WebApp;
+  var link = 'https://t.me' + '/sskamizan1';
+  if(tg && tg.openTelegramLink){ tg.openTelegramLink(link); } else { window.open(link, '_blank'); }
+  setTimeout(function(){
+    chCnt++; localStorage.setItem('ch_cnt', chCnt); updChBtn();
+    addPts(20); alert("চ্যানেল ভিজিটের জন্য ২০ কয়েন যোগ হয়েছে! (আজ " + chCnt + "/৫ বার সম্পন্ন)");
+  }, 2000);
+}
+
 function goAd(){
   if(window.Adsgram){
     var Ad = window.Adsgram.init({ blockId: "61370" });
     Ad.show().then(function(){ addPts(50); alert("অভিনন্দন! ৫০ কয়েন যোগ হয়েছে।"); }).catch(function(){ alert("অ্যাড লোড হয়নি বা রিভিউতে আছে, একটু পর চেষ্টা করুন।"); });
   } else { alert("অ্যাড সিস্টেম লোড হচ্ছে, একটু পর আবার ক্লিক করুন।"); }
 }
+
 function doWd(){
   var p = document.getElementById('phn').value;
   if(pts < 1000){ alert("কমপক্ষে ১০০০ কয়েন লাগবে!"); return; }
   if(!p || p.length < 11){ alert("সঠিক ১১ ডিজিটের নম্বর দিন!"); return; }
   alert("উইথড্র রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!");
-  pts -= 1000; localStorage.setItem('pts', pts); document.getElementById('pts').innerText = pts;
+  addPts(-1000);
 }
 </script>
 </body>
