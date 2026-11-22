@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Watch & Earn</title>
+    <script src="https://telegram.org"></script>
+    <script src="https://adsgram.ai"></script>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 15px; margin: 0; }
+        .card { background: #1e293b; border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .balance { font-size: 28px; font-weight: bold; color: #38bdf8; margin: 10px 0; }
+        .btn { background: linear-gradient(45deg, #2563eb, #38bdf8); color: white; border: none; padding: 14px 20px; font-size: 16px; font-weight: bold; border-radius: 10px; width: 100%; margin-top: 10px; cursor: pointer; }
+        .btn-channel { background: #10b981; }
+        .btn-withdraw { background: #f59e0b; color: #000; }
+        input, select { width: 90%; padding: 12px; margin-top: 10px; border-radius: 8px; border: none; font-size: 15px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h3>স্বাগতম, <span id="userName">User</span>!</h3>
+        <div>আপনার ব্যালেন্স</div>
+        <div class="balance"><span id="points">0</span> কয়েন</div>
+        <small>(১০০০ কয়েন = ১০ টাকা)</small>
+    </div>
+
+    <div class="card">
+        <h4>ধাপ ১: চ্যানেল ভিজিট ও পোস্ট দেখুন</h4>
+        <p style="font-size: 13px; color: #cbd5e1;">প্রতিদিন বোনাস পেতে আমাদের চ্যানেলের পোস্ট দেখুন</p>
+        <button class="btn btn-channel" onclick="visitChannel()">চ্যানেলে যান (+২০ কয়েন)</button>
+    </div>
+
+    <div class="card">
+        <h4>ধাপ ২: ভিডিও দেখুন ও স্পিন করুন</h4>
+        <p style="font-size: 13px; color: #cbd5e1;">প্রতিটি ভিডিও অ্যাড দেখলে পাবেন ৫০ কয়েন</p>
+        <button class="btn" onclick="watchAd()">ভিডিও অ্যাড দেখুন (+৫০ কয়েন)</button>
+    </div>
+
+    <div class="card">
+        <h4>টাকা উত্তোলন (Withdraw)</h4>
+        <select id="method">
+            <option value="bKash">বিকাশ (bKash)</option>
+            <option value="Nagad">নগদ (Nagad)</option>
+        </select>
+        <input type="number" id="phone" placeholder="আপনার মোবাইল নম্বর দিন">
+        <button class="btn btn-withdraw" onclick="withdraw()">উইথড্র রিকোয়েস্ট পাঠান</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('userName').innerText = tg.initDataUnsafe.user.first_name;
+        }
+
+        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "YOUR_BLOCK_ID" }) : null;
+
+        let points = parseInt(localStorage.getItem('user_points')) || 0;
+        document.getElementById('points').innerText = points;
+
+        function addPoints(amount) {
+            points += amount;
+            localStorage.setItem('user_points', points);
+            document.getElementById('points').innerText = points;
+        }
+
+        function visitChannel() {
+            tg.openTelegramLink("https://t.me");
+            setTimeout(() => {
+                addPoints(20);
+                alert("চ্যানেল ভিজিট করার জন্য ২০ কয়েন যোগ হয়েছে!");
+            }, 3000);
+        }
+
+        function watchAd() {
+            if (AdController) {
+                AdController.show().then((result) => {
+                    addPoints(50);
+                    alert("অভিনন্দন! আপনি ৫০ কয়েন পেয়েছেন।");
+                }).catch((result) => {
+                    alert("এই মুহূর্তে অ্যাড লোড হয়নি, একটু পর আবার চেষ্টা করুন।");
+                });
+            } else {
+                alert("অ্যাড সিস্টেম সেটআপ হচ্ছে!");
+            }
+        }
+
+        function withdraw() {
+            const phone = document.getElementById('phone').value;
+            const method = document.getElementById('method').value;
+            if (points < 1000) {
+                alert("উইথড্র করার জন্য কমপক্ষে ১০০০ কয়েন থাকতে হবে!");
+                return;
+            }
+            if (!phone || phone.length < 11) {
+                alert("সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন!");
+                return;
+            }
+            alert(method + " (" + phone + ") নম্বরে আপনার উইথড্র রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!");
+            points -= 1000;
+            localStorage.setItem('user_points', points);
+            document.getElementById('points').innerText = points;
+        }
+    </script>
+</body>
+</html>
