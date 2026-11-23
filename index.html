@@ -1,176 +1,284 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Watch & Earn</title>
-<style>
-body{font-family:sans-serif;background:#0f172a;color:#fff;text-align:center;padding:15px;margin:0}
-.card{background:#1e293b;border-radius:15px;padding:18px;margin-bottom:14px}
-.balance{font-size:28px;font-weight:bold;color:#38bdf8;margin:8px 0}
-.btn{background:#2563eb;color:#fff;border:none;padding:14px;font-size:15px;font-weight:bold;border-radius:10px;width:100%;margin-top:8px;cursor:pointer}
-.btn-sub{background:#8b5cf6}
-.btn-ch{background:#10b981}
-.btn-wd{background:#f59e0b;color:#000}
-input,select{width:90%;padding:12px;margin-top:10px;border-radius:8px;border:none;font-size:15px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Lucky Spin Arena</title>
+  <script src="https://telegram.org"></script>
+  <script src="https://adsgram.ai"></script>
+  <style>
+    * { box-sizing: border-box; user-select: none; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #070b14; color: #fff; margin: 0; padding: 0 0 75px 0; }
+    .top-bar { background: linear-gradient(135deg, #1e293b, #0f172a); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; position: sticky; top: 0; z-index: 50; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(45deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; }
+    .coin-pill { background: rgba(251, 191, 36, 0.15); border: 1px solid #fbbf24; color: #fbbf24; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 15px; }
+    .container { padding: 15px; max-width: 480px; margin: auto; }
+    .tab-content { display: none; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .card { background: #131c31; border: 1px solid #1e293b; border-radius: 18px; padding: 18px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); text-align: center; }
+    .wheel-wrapper { position: relative; width: 260px; height: 260px; margin: 18px auto; }
+    .wheel { width: 100%; height: 100%; border-radius: 50%; border: 8px solid #fbbf24; position: relative; overflow: hidden; box-shadow: 0 0 25px rgba(251, 191, 36, 0.3);
+      background: conic-gradient(#ef4444 0deg 45deg, #3b82f6 45deg 90deg, #10b981 90deg 135deg, #f59e0b 135deg 180deg, #8b5cf6 180deg 225deg, #ec4899 225deg 270deg, #06b6d4 270deg 315deg, #f97316 315deg 360deg);
+      transition: transform 3.8s cubic-bezier(0.15, 0.85, 0.15, 1);
+    }
+    .wheel-label { position: absolute; width: 50%; height: 20px; top: calc(50% - 10px); left: 50%; transform-origin: 0% 50%; font-weight: bold; font-size: 13px; color: #fff; text-shadow: 1px 1px 2px #000; padding-left: 38px; text-align: left; }
+    .pointer { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 28px solid #ffffff; z-index: 10; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.6)); }
+    .spin-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 48px; height: 48px; background: #1e293b; border: 4px solid #fbbf24; border-radius: 50%; z-index: 5; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #fbbf24; }
+    .btn { background: linear-gradient(45deg, #2563eb, #3b82f6); color: #fff; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+    .btn-ad { background: linear-gradient(45deg, #f59e0b, #fbbf24); color: #000; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+    .task-item { background: #1e293b; border-radius: 12px; padding: 12px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+    .task-title { font-weight: bold; font-size: 14px; }
+    .task-reward { font-size: 12px; color: #fbbf24; margin-top: 2px; }
+    .btn-sm { background: #3b82f6; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; }
+    .btn-sm:disabled { background: #10b981; color: #fff; }
+    .ref-link-box { background: #070b14; border: 1px dashed #38bdf8; padding: 12px; border-radius: 10px; font-size: 12px; color: #38bdf8; word-break: break-all; margin: 12px 0; }
+    input, select { width: 100%; padding: 13px; margin-top: 10px; border-radius: 10px; border: 1px solid #334155; background: #070b14; color: #fff; font-size: 15px; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #131c31; border-top: 1px solid #1e293b; display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
+    .nav-item { color: #64748b; text-align: center; font-size: 13px; cursor: pointer; flex: 1; font-weight: bold; }
+    .nav-item.active { color: #38bdf8; }
+  </style>
 </head>
 <body>
-<div class="card">
-<h3>স্বাগতম, <span id="uName">User</span>!</h3>
-<div>আপনার ব্যালেন্স</div>
-<div class="balance"><span id="pts">0</span> কয়েন</div>
-<small>(১,০০,০০০ কয়েন = ১,০০০ টাকা)</small>
-</div>
-<div class="card">
-<h4>ধাপ ১: চ্যানেল সাবস্ক্রাইব (একবারই)</h4>
-<p style="font-size:12px;color:#cbd5e1;margin:4px 0">আনসাবস্ক্রাইব করলে ১০০ কয়েন কেটে নেওয়া হবে</p>
-<button class="btn btn-sub" id="subBtn" onclick="subCh()">চ্যানেল সাবস্ক্রাইব করুন (+১০০ কয়েন)</button>
-</div>
-<div class="card">
-<h4>ধাপ ২: চ্যানেল ভিজিট (দিনে সর্বোচ্চ ৫ বার)</h4>
-<button class="btn btn-ch" id="chBtn" onclick="goCh()">চ্যানেলে যান (+২০ কয়েন)</button>
-</div>
-<div class="card">
-<h4>ধাপ ৩: ভিডিও দেখুন ও আয় করুন (আনলিমিটেড)</h4>
-<button class="btn" onclick="goAd()">ভিডিও অ্যাড দেখুন (+৫০ কয়েন)</button>
-</div>
-<div class="card">
-<h4>টাকা উত্তোলন (মিনিমাম ১,০০০ টাকা)</h4>
-<select id="mth"><option value="bKash">বিকাশ (bKash)</option><option value="Nagad">নগদ (Nagad)</option></select>
-<input type="number" id="phn" placeholder="মোবাইল নম্বর দিন">
-<button class="btn btn-wd" onclick="doWd()">উইথড্র রিকোয়েস্ট (১,০০,০০০ কয়েন = ১,০০০ টাকা)</button>
-</div>
-<script>
-var BOT_TOKEN = "9025914421";
-var ADMIN_ID = "8577063798";
-var CHANNEL = "@sskamizan1";
-var uid = "Unknown", uFull = "User";
 
-var TG_API = "https://" + "api.telegram.org" + "/bot" + BOT_TOKEN;
-var CH_LINK = "https://" + "t.me" + "/sskamizan1";
+  <div class="top-bar">
+    <div class="user-info">
+      <div class="avatar" id="uAvatar">P</div>
+      <div>
+        <div style="font-weight:bold; font-size:14px;" id="uName">Player</div>
+        <div style="font-size:11px; color:#94a3b8;">ID: <span id="uId">000000</span></div>
+      </div>
+    </div>
+    <div class="coin-pill">Coins: <span id="pts">0</span></div>
+  </div>
 
-function addScript(src, cb){
-  var s = document.createElement("script");
-  s.src = src;
-  if(cb) s.onload = cb;
-  document.head.appendChild(s);
-}
+  <div class="container">
+    <div id="tab-game" class="tab-content active">
+      <div class="card">
+        <h3 style="margin:0 0 4px 0; color:#fbbf24;">Lucky Spin Wheel</h3>
+        <p style="font-size:12px; color:#94a3b8; margin:0;">চাকা ঘুরিয়ে জিতে নিন ১০ থেকে ৫০০ কয়েন পর্যন্ত!</p>
+        <div class="wheel-wrapper">
+          <div class="pointer"></div>
+          <div class="wheel" id="wheel">
+            <div class="wheel-label" style="transform: rotate(22.5deg);">10</div>
+            <div class="wheel-label" style="transform: rotate(67.5deg);">20</div>
+            <div class="wheel-label" style="transform: rotate(112.5deg);">50</div>
+            <div class="wheel-label" style="transform: rotate(157.5deg);">100</div>
+            <div class="wheel-label" style="transform: rotate(202.5deg);">150</div>
+            <div class="wheel-label" style="transform: rotate(247.5deg);">200</div>
+            <div class="wheel-label" style="transform: rotate(292.5deg);">300</div>
+            <div class="wheel-label" style="transform: rotate(337.5deg);">500</div>
+          </div>
+          <div class="spin-center">SPIN</div>
+        </div>
+        <button class="btn" id="spinBtn" onclick="playSpin()">চাকা ঘোরান (Spin Now)</button>
+        <button class="btn btn-ad" onclick="watchAd()">অ্যাড দেখে স্পিন আনলক করুন (+২০ কয়েন)</button>
+      </div>
+    </div>
 
-addScript("https://" + "telegram.org" + "/js/" + "telegram-web-app.js", function(){
-  var tg = window.Telegram && window.Telegram.WebApp;
-  if(tg){
-    tg.ready(); tg.expand();
-    if(tg.initDataUnsafe && tg.initDataUnsafe.user){
-      uFull = tg.initDataUnsafe.user.first_name;
-      document.getElementById("uName").innerText = uFull;
-      uid = tg.initDataUnsafe.user.id;
-      checkSubStatus();
+      <div id="tab-tasks" class="tab-content">
+      <div class="card">
+        <h3 style="margin:0 0 5px 0;">কমিউনিটি টাস্ক</h3>
+        <p style="font-size:12px; color:#94a3b8; margin:0 0 15px 0;">টাস্কগুলো সম্পন্ন করে বোনাস কয়েন সংগ্রহ করুন</p>
+        <div class="task-item">
+          <div><div class="task-title">চ্যানেল সাবস্ক্রাইব করুন</div><div class="task-reward">+৫০০ কয়েন বোনাস</div></div>
+          <button class="btn-sm" id="btn-sub" onclick="doTask('sub', 500)">জয়েন</button>
+        </div>
+        <div class="task-item">
+          <div><div class="task-title">চ্যানেলের পোস্টে লাইক দিন</div><div class="task-reward">+২০ কয়েন বোনাস</div></div>
+          <button class="btn-sm" id="btn-like" onclick="doTask('like', 20)">লাইক</button>
+        </div>
+        <div class="task-item">
+          <div><div class="task-title">চ্যানেলের পোস্টে কমেন্ট করুন</div><div class="task-reward">+৫০ কয়েন বোনাস</div></div>
+          <button class="btn-sm" id="btn-comm" onclick="doTask('comm', 50)">কমেন্ট</button>
+        </div>
+        <div class="task-item">
+          <div><div class="task-title">চ্যানেলের লিংক শেয়ার করুন</div><div class="task-reward">+৫০ কয়েন বোনাস</div></div>
+          <button class="btn-sm" id="btn-share" onclick="shareChannel()">শেয়ার</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-invite" class="tab-content">
+      <div class="card">
+        <h3 style="margin:0 0 5px 0; color:#fbbf24;">বন্ধুদের ইনভাইট করুন</h3>
+        <p style="font-size:13px; color:#cbd5e1; line-height:1.5;">
+          আপনার রেফারেল লিংক শেয়ার করে প্রতিটি সফল রেফারে পাবেন <b style="color:#fbbf24;">২০০ কয়েন</b> এবং আপনার রেফার করা বন্ধু যত কয়েন আয় করবে তার <b style="color:#38bdf8;">২% লাইফটাইম কমিশন</b>!
+        </p>
+        <div class="ref-link-box" id="refLink">Loading...</div>
+        <button class="btn" style="background:#8b5cf6;" onclick="inviteFriend()">রেফার লিংক শেয়ার করুন</button>
+        <button class="btn" style="background:#334155;" onclick="copyRef()">লিংক কপি করুন</button>
+      </div>
+    </div>
+
+    <div id="tab-wallet" class="tab-content">
+      <div class="card">
+        <h3 style="margin:0 0 5px 0;">কয়েন উত্তোলন (Wallet)</h3>
+        <div style="background:#070b14; padding:12px; border-radius:12px; margin:12px 0;">
+          <div style="font-size:12px; color:#94a3b8;">বর্তমান ব্যালেন্স</div>
+          <div style="font-size:26px; font-weight:bold; color:#fbbf24;"><span id="wPts">0</span> কয়েন</div>
+          <div style="font-size:12px; color:#10b981; margin-top:3px;">রেট: ১,০০,০০০ কয়েন = ১,০০০ টাকা</div>
+        </div>
+        <select id="mth">
+          <option value="bKash">বিকাশ (bKash)</option>
+          <option value="Nagad">নগদ (Nagad)</option>
+        </select>
+        <input type="number" id="phn" placeholder="আপনার ১১ ডিজিটের মোবাইল নম্বর দিন">
+        <button class="btn" style="background:#10b981;" onclick="doWd()">উইথড্র রিকোয়েস্ট পাঠান</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('game', this)">গেম</div>
+    <div class="nav-item" onclick="switchTab('tasks', this)">টাস্ক</div>
+    <div class="nav-item" onclick="switchTab('invite', this)">রেফার</div>
+    <div class="nav-item" onclick="switchTab('wallet', this)">ওয়ালেট</div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const BOT_TOKEN = "8577063798";
+    const CHANNEL_LINK = "https://t.me";
+    const CHAT_ID = "8577063798";
+    const BLOCK_ID = "61528";
+
+    const BOT_USERNAME = "LuckySpinArena007_Bot";
+    const user = tg.initDataUnsafe?.user;
+    const userId = user?.id || "100200";
+    const userName = user?.first_name || "Player";
+
+    document.getElementById('uName').innerText = userName;
+    document.getElementById('uId').innerText = userId;
+    document.getElementById('uAvatar').innerText = userName.charAt(0).toUpperCase();
+
+    const myRefLink = `https://t.me{BOT_USERNAME}?start=${userId}`;
+    document.getElementById('refLink').innerText = myRefLink;
+
+    let pts = parseInt(localStorage.getItem('pts')) || 0;
+    let canSpin = localStorage.getItem('canSpin') !== 'false';
+    let isSpinning = false;
+    let currentDeg = 0;
+
+    function switchTab(tabName, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      el.classList.add('active');
     }
-  }
-});
 
-addScript("https://" + "sad." + "adsgram.ai" + "/js/" + "sad.min.js");
+    function updateUI() {
+      document.getElementById('pts').innerText = pts;
+      document.getElementById('wPts').innerText = pts;
+      const spinBtn = document.getElementById('spinBtn');
+      if (canSpin) {
+        spinBtn.disabled = false;
+        spinBtn.innerText = "চাকা ঘোরান (Spin Now)";
+      } else {
+        spinBtn.disabled = true;
+        spinBtn.innerText = "স্পিন লক! নিচের অ্যাড দেখে আনলক করুন";
+      }
+      ['sub', 'like', 'comm', 'share'].forEach(t => {
+        if (localStorage.getItem('task_' + t) === 'done') {
+          const btn = document.getElementById('btn-' + t);
+          if (btn) { btn.disabled = true; btn.innerText = "সম্পন্ন"; }
+        }
+      });
+    }
+    updateUI();
 
-var pts = parseInt(localStorage.getItem("pts")) || 0;
-document.getElementById("pts").innerText = pts;
-function addPts(n){ pts = Math.max(0, pts + n); localStorage.setItem("pts", pts); document.getElementById("pts").innerText = pts; }
+    function addPts(n) {
+      pts += n;
+      localStorage.setItem('pts', pts);
+      updateUI();
+    }
 
-function updSubUI(done){
-  var sb = document.getElementById("subBtn");
-  if(done){ sb.innerText = "সাবস্ক্রাইব সম্পন্ন হয়েছে ✓"; sb.style.background = "#475569"; }
-  else { sb.innerText = "চ্যানেল সাবস্ক্রাইব করুন (+১০০ কয়েন)"; sb.style.background = "#8b5cf6"; }
-}
-updSubUI(localStorage.getItem("sub_done") === "1");
+    function playSpin() {
+      if (isSpinning || !canSpin) return;
+      isSpinning = true;
+      const prizes =;
+      const weights =;
+      const idx = weights[Math.floor(Math.random() * weights.length)];
+      const won = prizes[idx];
+      const targetAngle = 360 - (idx * 45) - 22.5;
+      currentDeg += 1800 + targetAngle - (currentDeg % 360);
+      document.getElementById('wheel').style.transform = `rotate(${currentDeg}deg)`;
 
-function checkSubStatus(){
-  if(uid === "Unknown" || BOT_TOKEN === "YOUR_BOT_TOKEN") return;
-  fetch(TG_API + "/getChatMember?chat_id=" + CHANNEL + "&user_id=" + uid)
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.ok){
-      var st = d.result.status;
-      var isMember = (st === "member" || st === "administrator" || st === "creator");
-      if(!isMember && localStorage.getItem("sub_done") === "1"){
-        localStorage.removeItem("sub_done"); updSubUI(false); addPts(-100);
-        alert("সতর্কতা! আপনি চ্যানেল আনসাবস্ক্রাইব করায় ১০০ কয়েন কেটে নেওয়া হয়েছে!");
+      setTimeout(() => {
+        isSpinning = false;
+        canSpin = false;
+        localStorage.setItem('canSpin', 'false');
+        addPts(won);
+        alert(`অভিনন্দন! আপনি স্পিন করে ${won} কয়েন জিতেছেন!\n\nআবার স্পিন করতে নিচের অ্যাড বাটনে ক্লিক করুন।`);
+      }, 3900);
+    }
+
+    function watchAd() {
+      if (window.Adsgram) {
+        const Ad = window.Adsgram.init({ blockId: BLOCK_ID });
+        Ad.show().then(() => {
+          canSpin = true;
+          localStorage.setItem('canSpin', 'true');
+          addPts(20);
+          alert("ধন্যবাদ! আপনি +২০ কয়েন পেয়েছেন এবং আপনার নতুন স্পিন আনলক হয়েছে!");
+        }).catch((result) => {
+          alert("বিজ্ঞপ্তি: " + (result.description || "অ্যাড এখনো অ্যাক্টিভ হয়নি বা লোড হচ্ছে না।"));
+        });
+      } else {
+        alert("Adsgram স্ক্রিপ্ট লোড হয়নি।");
       }
     }
-  });
-}
 
-var today = new Date().toDateString();
-if(localStorage.getItem("ch_date") !== today){ localStorage.setItem("ch_date", today); localStorage.setItem("ch_cnt", "0"); }
-var chCnt = parseInt(localStorage.getItem("ch_cnt")) || 0;
-function updChBtn(){
-  var cb = document.getElementById("chBtn");
-  var rem = 5 - chCnt;
-  if(rem <= 0){ cb.innerText = "আজকের ভিজিট শেষ (আগামীকাল আবার)"; cb.style.background = "#475569"; }
-  else { cb.innerText = "চ্যানেলে যান (+২০ কয়েন) [" + rem + "/৫ বাকি]"; }
-}
-updChBtn();
-
-function subCh(){
-  if(localStorage.getItem("sub_done") === "1"){ alert("আপনি ইতিমধ্যে সাবস্ক্রাইব বোনাস নিয়েছেন!"); return; }
-  var tg = window.Telegram && window.Telegram.WebApp;
-  if(tg && tg.openTelegramLink){ tg.openTelegramLink(CH_LINK); } else { window.open(CH_LINK, "_blank"); }
-  setTimeout(function(){
-    if(uid === "Unknown" || BOT_TOKEN === "YOUR_BOT_TOKEN"){
-      addPts(100); localStorage.setItem("sub_done", "1"); updSubUI(true);
-      alert("চ্যানেল সাবস্ক্রাইবের জন্য ১০০ কয়েন যোগ হয়েছে!"); return;
+    function doTask(type, reward) {
+      if (localStorage.getItem('task_' + type) === 'done') return;
+      tg.openTelegramLink(CHANNEL_LINK);
+      setTimeout(() => {
+        localStorage.setItem('task_' + type, 'done');
+        addPts(reward);
+        alert(`অভিনন্দন! টাস্ক সম্পন্ন করার জন্য +${reward} কয়েন যোগ হয়েছে।`);
+      }, 3000);
     }
-    fetch(TG_API + "/getChatMember?chat_id=" + CHANNEL + "&user_id=" + uid)
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(d.ok && (d.result.status === "member" || d.result.status === "administrator" || d.result.status === "creator")){
-        addPts(100); localStorage.setItem("sub_done", "1"); updSubUI(true);
-        alert("ধন্যবাদ! চ্যানেল সাবস্ক্রাইবের জন্য ১০০ কয়েন যোগ হয়েছে!");
-      } else { alert("আপনি এখনো চ্যানেল সাবস্ক্রাইব করেননি! চ্যানেলে Join হয়ে আবার ক্লিক করুন।"); }
-    });
-  }, 4000);
-}
 
-function goCh(){
-  if(chCnt >= 5){ alert("আজকের জন্য সর্বোচ্চ ৫ বার ভিজিট শেষ! আগামীকাল আবার চেষ্টা করুন।"); return; }
-  var tg = window.Telegram && window.Telegram.WebApp;
-  if(tg && tg.openTelegramLink){ tg.openTelegramLink(CH_LINK); } else { window.open(CH_LINK, "_blank"); }
-  setTimeout(function(){
-    chCnt++; localStorage.setItem("ch_cnt", chCnt); updChBtn();
-    addPts(20); alert("চ্যানেল ভিজিটের জন্য ২০ কয়েন যোগ হয়েছে! (আজ " + chCnt + "/৫ বার সম্পন্ন)");
-  }, 2000);
-}
+    function shareChannel() {
+      if (localStorage.getItem('task_share') === 'done') return;
+      const url = `https://t.me{encodeURIComponent(CHANNEL_LINK)}&text=${encodeURIComponent("দারুণ এই টেলিগ্রাম চ্যানেলে জয়েন করুন!")}`;
+      tg.openTelegramLink(url);
+      setTimeout(() => {
+        localStorage.setItem('task_share', 'done');
+        addPts(50);
+        alert("চ্যানেল শেয়ার করার জন্য +৫০ কয়েন যোগ হয়েছে!");
+      }, 3000);
+    }
 
-function goAd(){
-  if(window.Adsgram){
-    var Ad = window.Adsgram.init({ blockId: "61370" });
-    Ad.show().then(function(){
-      addPts(50);
-      alert("অভিনন্দন! ৫০ কয়েন যোগ হয়েছে।");
-    }).catch(function(err){
-      var msg = (err && err.description) ? err.description : "Adsgram ব্লকটি এখনো রিভিউতে (Created) আছে অথবা এই মুহূর্তে অ্যাড খালি নেই।";
-      alert("বিজ্ঞপ্তি: " + msg);
-    });
-  } else {
-    alert("অ্যাড স্ক্রিপ্ট এখনো লোড হচ্ছে। কয়েক সেকেন্ড অপেক্ষা করে আবার চাপ দিন!");
-  }
-}
+    function inviteFriend() {
+      const text = "Lucky Spin Arena গেমটি খেলুন এবং চাকা ঘুরিয়ে প্রতিদিন কয়েন জিতুন!";
+      const url = `https://t.me{encodeURIComponent(myRefLink)}&text=${encodeURIComponent(text)}`;
+      tg.openTelegramLink(url);
+    }
 
-function doWd(){
-  var p = document.getElementById("phn").value;
-  var m = document.getElementById("mth").value;
-  if(pts < 100000){ alert("উইথড্র করার জন্য কমপক্ষে ১,০০,০০০ কয়েন (১,০০০ টাকা) থাকতে হবে!"); return; }
-  if(!p || p.length < 11){ alert("সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন!"); return; }
-  
-  var msg = "💸 নতুন উইথড্র রিকোয়েস্ট!\n\n👤 নাম: " + uFull + "\n🆔 আইডি: " + uid + "\n💳 মাধ্যম: " + m + "\n📱 নম্বর: " + p + "\n💰 পরিমাণ: ১,০০,০০০ কয়েন (১,০০০ টাকা)";
-  
-  if(BOT_TOKEN !== "YOUR_BOT_TOKEN"){
-    fetch(TG_API + "/sendMessage?chat_id=" + ADMIN_ID + "&text=" + encodeURIComponent(msg));
-  }
-  
-  addPts(-100000);
-  document.getElementById("phn").value = "";
-  alert("আপনার ১,০০০ টাকার উইথড্র রিকোয়েস্ট অ্যাডমিনের কাছে পাঠানো হয়েছে! শীঘ্রই পেমেন্ট পেয়ে যাবেন।");
-}
-</script>
+    function copyRef() {
+      navigator.clipboard.writeText(myRefLink);
+      alert("আপনার রেফারেল লিংক কপি হয়েছে! বন্ধুদের সাথে শেয়ার করুন।");
+    }
+
+    function doWd() {
+      const p = document.getElementById('phn').value;
+      const m = document.getElementById('mth').value;
+      if (pts < 100000) { alert("উইথড্র করার জন্য কমপক্ষে ১,০০,০০০ কয়েন প্রয়োজন!"); return; }
+      if (!p || p.length < 11) { alert("সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন!"); return; }
+      const msg = `নতুন উইথড্র রিকোয়েস্ট!\n\nনাম: ${userName} (ID: ${userId})\nমাধ্যম: ${m}\nনম্বর: ${p}\nকয়েন: ${pts}`;
+      if (BOT_TOKEN !== "YOUR_BOT_TOKEN" && CHAT_ID !== "YOUR_CHAT_ID") {
+        fetch(`https://telegram.org{BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}`);
+      }
+      addPts(-100000);
+      document.getElementById('phn').value = "";
+      alert("আপনার উইথড্র রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!");
+    }
+  </script>
 </body>
 </html>
