@@ -1,283 +1,220 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Lucky Spin Arena</title>
-  • <script src="https://telegram.org/js/telegram-web-app.js"></script>
-• <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://adsgram.ai/js/sad.min.js"></script>
   <style>
     * { box-sizing: border-box; user-select: none; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #070b14; color: #fff; margin: 0; padding: 0 0 75px 0; }
-    .top-bar { background: linear-gradient(135deg, #1e293b, #0f172a); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; position: sticky; top: 0; z-index: 50; }
-    .user-info { display: flex; align-items: center; gap: 10px; }
-    .avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(45deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; }
-    .coin-pill { background: rgba(251, 191, 36, 0.15); border: 1px solid #fbbf24; color: #fbbf24; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 15px; }
-    .container { padding: 15px; max-width: 480px; margin: auto; }
-    .tab-content { display: none; animation: fadeIn 0.3s ease; }
-    .tab-content.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    .card { background: #131c31; border: 1px solid #1e293b; border-radius: 18px; padding: 18px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); text-align: center; }
-    .wheel-wrapper { position: relative; width: 260px; height: 260px; margin: 18px auto; }
-    .wheel { width: 100%; height: 100%; border-radius: 50%; border: 8px solid #fbbf24; position: relative; overflow: hidden; box-shadow: 0 0 25px rgba(251, 191, 36, 0.3);
+    body { font-family: sans-serif; background: #070b14; color: #fff; margin: 0; padding-bottom: 70px; }
+    .top { background: #1e293b; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+    .pill { background: #292524; border: 1px solid #fbbf24; color: #fbbf24; padding: 5px 12px; border-radius: 20px; font-weight: bold; }
+    .box { padding: 15px; max-width: 450px; margin: auto; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+    .card { background: #131c31; border-radius: 16px; padding: 16px; margin-bottom: 12px; text-align: center; }
+    .wheel-wrap { position: relative; width: 240px; height: 240px; margin: 15px auto; }
+    .wheel {
+      width: 100%; height: 100%; border-radius: 50%; border: 6px solid #fbbf24; position: relative; overflow: hidden;
       background: conic-gradient(#ef4444 0deg 45deg, #3b82f6 45deg 90deg, #10b981 90deg 135deg, #f59e0b 135deg 180deg, #8b5cf6 180deg 225deg, #ec4899 225deg 270deg, #06b6d4 270deg 315deg, #f97316 315deg 360deg);
-      transition: transform 3.8s cubic-bezier(0.15, 0.85, 0.15, 1);
+      transition: transform 3.5s cubic-bezier(0.15, 0.85, 0.15, 1);
     }
-    .wheel-label { position: absolute; width: 50%; height: 20px; top: calc(50% - 10px); left: 50%; transform-origin: 0% 50%; font-weight: bold; font-size: 13px; color: #fff; text-shadow: 1px 1px 2px #000; padding-left: 38px; text-align: left; }
-    .pointer { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 28px solid #ffffff; z-index: 10; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.6)); }
-    .spin-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 48px; height: 48px; background: #1e293b; border: 4px solid #fbbf24; border-radius: 50%; z-index: 5; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #fbbf24; }
-    .btn { background: linear-gradient(45deg, #2563eb, #3b82f6); color: #fff; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; transition: 0.2s; }
-    .btn:active { transform: scale(0.98); }
-    .btn:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
-    .btn-ad { background: linear-gradient(45deg, #f59e0b, #fbbf24); color: #000; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
-    .task-item { background: #1e293b; border-radius: 12px; padding: 12px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
-    .task-title { font-weight: bold; font-size: 14px; }
-    .task-reward { font-size: 12px; color: #fbbf24; margin-top: 2px; }
-    .btn-sm { background: #3b82f6; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; }
-    .btn-sm:disabled { background: #10b981; color: #fff; }
-    .ref-link-box { background: #070b14; border: 1px dashed #38bdf8; padding: 12px; border-radius: 10px; font-size: 12px; color: #38bdf8; word-break: break-all; margin: 12px 0; }
-    input, select { width: 100%; padding: 13px; margin-top: 10px; border-radius: 10px; border: 1px solid #334155; background: #070b14; color: #fff; font-size: 15px; }
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #131c31; border-top: 1px solid #1e293b; display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
-    .nav-item { color: #64748b; text-align: center; font-size: 13px; cursor: pointer; flex: 1; font-weight: bold; }
-    .nav-item.active { color: #38bdf8; }
+    .lbl { position: absolute; width: 50%; height: 20px; top: calc(50% - 10px); left: 50%; transform-origin: 0% 50%; font-weight: bold; font-size: 13px; padding-left: 35px; text-align: left; }
+    .ptr { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 24px solid #fff; z-index: 10; }
+    .ctr { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; background: #1e293b; border: 3px solid #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #fbbf24; }
+    .btn { background: #2563eb; color: #fff; border: none; padding: 13px; border-radius: 10px; font-size: 15px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+    .btn:disabled { background: #334155; color: #64748b; }
+    .btn-ad { background: #f59e0b; color: #000; }
+    .t-row { background: #1e293b; border-radius: 10px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+    .btn-sm { background: #3b82f6; color: #fff; border: none; padding: 7px 12px; border-radius: 6px; font-weight: bold; }
+    .btn-sm:disabled { background: #10b981; }
+    .ref { background: #070b14; border: 1px dashed #38bdf8; padding: 10px; border-radius: 8px; font-size: 12px; color: #38bdf8; word-break: break-all; margin: 10px 0; }
+    input, select { width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: 1px solid #334155; background: #070b14; color: #fff; }
+    .nav { position: fixed; bottom: 0; left: 0; right: 0; background: #131c31; border-top: 1px solid #1e293b; display: flex; padding: 12px 0; z-index: 99; }
+    .nav div { flex: 1; text-align: center; font-size: 13px; font-weight: bold; color: #64748b; cursor: pointer; }
+    .nav div.active { color: #38bdf8; }
   </style>
 </head>
 <body>
-
-  <div class="top-bar">
-    <div class="user-info">
-      <div class="avatar" id="uAvatar">P</div>
-      <div>
-        <div style="font-weight:bold; font-size:14px;" id="uName">Player</div>
-        <div style="font-size:11px; color:#94a3b8;">ID: <span id="uId">000000</span></div>
-      </div>
-    </div>
-    <div class="coin-pill">Coins: <span id="pts">0</span></div>
+  <div class="top">
+    <div><b id="uName">Player</b> <small style="color:#94a3b8;">(ID: <span id="uId">0</span>)</small></div>
+    <div class="pill">Coins: <span id="pts">0</span></div>
   </div>
-
-  <div class="container">
-    <div id="tab-game" class="tab-content active">
+  <div class="box">
+    <div id="t-game" class="tab active">
       <div class="card">
-        <h3 style="margin:0 0 4px 0; color:#fbbf24;">Lucky Spin Wheel</h3>
-        <p style="font-size:12px; color:#94a3b8; margin:0;">চাকা ঘুরিয়ে জিতে নিন ১০ থেকে ৫০০ কয়েন পর্যন্ত!</p>
-        <div class="wheel-wrapper">
-          <div class="pointer"></div>
+        <h3 style="margin:0;color:#fbbf24">Lucky Spin Wheel</h3>
+        <div class="wheel-wrap">
+          <div class="ptr"></div>
           <div class="wheel" id="wheel">
-            <div class="wheel-label" style="transform: rotate(22.5deg);">10</div>
-            <div class="wheel-label" style="transform: rotate(67.5deg);">20</div>
-            <div class="wheel-label" style="transform: rotate(112.5deg);">50</div>
-            <div class="wheel-label" style="transform: rotate(157.5deg);">100</div>
-            <div class="wheel-label" style="transform: rotate(202.5deg);">150</div>
-            <div class="wheel-label" style="transform: rotate(247.5deg);">200</div>
-            <div class="wheel-label" style="transform: rotate(292.5deg);">300</div>
-            <div class="wheel-label" style="transform: rotate(337.5deg);">500</div>
+            <div class="lbl" style="transform:rotate(22.5deg)">10</div>
+            <div class="lbl" style="transform:rotate(67.5deg)">20</div>
+            <div class="lbl" style="transform:rotate(112.5deg)">50</div>
+            <div class="lbl" style="transform:rotate(157.5deg)">100</div>
+            <div class="lbl" style="transform:rotate(202.5deg)">150</div>
+            <div class="lbl" style="transform:rotate(247.5deg)">200</div>
+            <div class="lbl" style="transform:rotate(292.5deg)">300</div>
+            <div class="lbl" style="transform:rotate(337.5deg)">500</div>
           </div>
-          <div class="spin-center">SPIN</div>
+          <div class="ctr">SPIN</div>
         </div>
-        <button class="btn" id="spinBtn" onclick="playSpin()">চাকা ঘোরান (Spin Now)</button>
-        <button class="btn btn-ad" onclick="watchAd()">অ্যাড দেখে স্পিন আনলক করুন (+২০ কয়েন)</button>
+        <button class="btn" id="spinBtn" onclick="playSpin()">Spin Now</button>
+        <button class="btn btn-ad" onclick="watchAd()">Watch Ad to Unlock Spin (+20 Coins)</button>
       </div>
     </div>
-
-      <div id="tab-tasks" class="tab-content">
+    <div id="t-tasks" class="tab">
       <div class="card">
-        <h3 style="margin:0 0 5px 0;">কমিউনিটি টাস্ক</h3>
-        <p style="font-size:12px; color:#94a3b8; margin:0 0 15px 0;">টাস্কগুলো সম্পন্ন করে বোনাস কয়েন সংগ্রহ করুন</p>
-        <div class="task-item">
-          <div><div class="task-title">চ্যানেল সাবস্ক্রাইব করুন</div><div class="task-reward">+৫০০ কয়েন বোনাস</div></div>
-          <button class="btn-sm" id="btn-sub" onclick="doTask('sub', 500)">জয়েন</button>
-        </div>
-        <div class="task-item">
-          <div><div class="task-title">চ্যানেলের পোস্টে লাইক দিন</div><div class="task-reward">+২০ কয়েন বোনাস</div></div>
-          <button class="btn-sm" id="btn-like" onclick="doTask('like', 20)">লাইক</button>
-        </div>
-        <div class="task-item">
-          <div><div class="task-title">চ্যানেলের পোস্টে কমেন্ট করুন</div><div class="task-reward">+৫০ কয়েন বোনাস</div></div>
-          <button class="btn-sm" id="btn-comm" onclick="doTask('comm', 50)">কমেন্ট</button>
-        </div>
-        <div class="task-item">
-          <div><div class="task-title">চ্যানেলের লিংক শেয়ার করুন</div><div class="task-reward">+৫০ কয়েন বোনাস</div></div>
-          <button class="btn-sm" id="btn-share" onclick="shareChannel()">শেয়ার</button>
-        </div>
+        <h3 style="margin:0 0 10px 0">Community Tasks</h3>
+        <div class="t-row"><div><b>Subscribe Channel</b><br><small style="color:#fbbf24">+500 Coins</small></div><button class="btn-sm" id="b-sub" onclick="doTask('sub',500)">Join</button></div>
+        <div class="t-row"><div><b>Like Channel Post</b><br><small style="color:#fbbf24">+20 Coins</small></div><button class="btn-sm" id="b-like" onclick="doTask('like',20)">Like</button></div>
+        <div class="t-row"><div><b>Comment on Post</b><br><small style="color:#fbbf24">+50 Coins</small></div><button class="btn-sm" id="b-comm" onclick="doTask('comm',50)">Comment</button></div>
+        <div class="t-row"><div><b>Share Channel</b><br><small style="color:#fbbf24">+50 Coins</small></div><button class="btn-sm" id="b-share" onclick="shareCh()">Share</button></div>
       </div>
     </div>
-
-    <div id="tab-invite" class="tab-content">
+    <div id="t-invite" class="tab">
       <div class="card">
-        <h3 style="margin:0 0 5px 0; color:#fbbf24;">বন্ধুদের ইনভাইট করুন</h3>
-        <p style="font-size:13px; color:#cbd5e1; line-height:1.5;">
-          আপনার রেফারেল লিংক শেয়ার করে প্রতিটি সফল রেফারে পাবেন <b style="color:#fbbf24;">২০০ কয়েন</b> এবং আপনার রেফার করা বন্ধু যত কয়েন আয় করবে তার <b style="color:#38bdf8;">২% লাইফটাইম কমিশন</b>!
-        </p>
-        <div class="ref-link-box" id="refLink">Loading...</div>
-        <button class="btn" style="background:#8b5cf6;" onclick="inviteFriend()">রেফার লিংক শেয়ার করুন</button>
-        <button class="btn" style="background:#334155;" onclick="copyRef()">লিংক কপি করুন</button>
+        <h3 style="margin:0;color:#fbbf24">Invite Friends</h3>
+        <p style="font-size:13px;color:#cbd5e1">Get <b>200 Coins</b> per referral + <b>2%</b> of their earnings!</p>
+        <div class="ref" id="refLink">Loading...</div>
+        <button class="btn" style="background:#8b5cf6" onclick="invFr()">Share Referral Link</button>
+        <button class="btn" style="background:#334155" onclick="cpyRef()">Copy Link</button>
       </div>
     </div>
-
-    <div id="tab-wallet" class="tab-content">
+    <div id="t-wallet" class="tab">
       <div class="card">
-        <h3 style="margin:0 0 5px 0;">কয়েন উত্তোলন (Wallet)</h3>
-        <div style="background:#070b14; padding:12px; border-radius:12px; margin:12px 0;">
-          <div style="font-size:12px; color:#94a3b8;">বর্তমান ব্যালেন্স</div>
-          <div style="font-size:26px; font-weight:bold; color:#fbbf24;"><span id="wPts">0</span> কয়েন</div>
-          <div style="font-size:12px; color:#10b981; margin-top:3px;">রেট: ১,০০,০০০ কয়েন = ১,০০০ টাকা</div>
-        </div>
-        <select id="mth">
-          <option value="bKash">বিকাশ (bKash)</option>
-          <option value="Nagad">নগদ (Nagad)</option>
-        </select>
-        <input type="number" id="phn" placeholder="আপনার ১১ ডিজিটের মোবাইল নম্বর দিন">
-        <button class="btn" style="background:#10b981;" onclick="doWd()">উইথড্র রিকোয়েস্ট পাঠান</button>
+        <h3 style="margin:0 0 10px 0">Wallet (100,000 Coins = 1,000 BDT)</h3>
+        <select id="mth"><option value="bKash">bKash</option><option value="Nagad">Nagad</option></select>
+        <input type="number" id="phn" placeholder="Enter 11 digit number">
+        <button class="btn" style="background:#10b981" onclick="doWd()">Submit Withdraw</button>
       </div>
     </div>
   </div>
-
-  <div class="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('game', this)">গেম</div>
-    <div class="nav-item" onclick="switchTab('tasks', this)">টাস্ক</div>
-    <div class="nav-item" onclick="switchTab('invite', this)">রেফার</div>
-    <div class="nav-item" onclick="switchTab('wallet', this)">ওয়ালেট</div>
+  <div class="nav">
+    <div class="active" onclick="go('game',this)">Game</div>
+    <div onclick="go('tasks',this)">Tasks</div>
+    <div onclick="go('invite',this)">Invite</div>
+    <div onclick="go('wallet',this)">Wallet</div>
   </div>
-
   <script>
-    const tg = window.Telegram.WebApp;
+    var BOT_TOKEN = "9037269434";
+    var P = "https://";
+    var CH_LINK = P + "t.me/sskamizan1";
+    var CHAT_ID = "8577063798";
+    var BLOCK_ID = "61528";
+    var tg = window.Telegram.WebApp;
     tg.expand();
 
-    const BOT_TOKEN = "8577063798";
-    const CHANNEL_LINK = "https://t.me";
-    const CHAT_ID = "8577063798";
-    const BLOCK_ID = "61528";
+    var u = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    var uid = u ? u.id : "100200";
+    var uname = u ? u.first_name : "Player";
+    document.getElementById('uName').innerText = uname;
+    document.getElementById('uId').innerText = uid;
 
-    const BOT_USERNAME = "LuckySpinArena007_Bot";
-    const user = tg.initDataUnsafe?.user;
-    const userId = user?.id || "100200";
-    const userName = user?.first_name || "Player";
+    var myRef = P + "t.me/LuckySpinArena007_Bot?start=" + uid;
+    document.getElementById('refLink').innerText = myRef;
 
-    document.getElementById('uName').innerText = userName;
-    document.getElementById('uId').innerText = userId;
-    document.getElementById('uAvatar').innerText = userName.charAt(0).toUpperCase();
+    var pts = parseInt(localStorage.getItem('pts')) || 0;
+    var canSpin = localStorage.getItem('canSpin') !== 'false';
+    var spinning = false;
+    var deg = 0;
 
-    const myRefLink = `https://t.me{BOT_USERNAME}?start=${userId}`;
-    document.getElementById('refLink').innerText = myRefLink;
-
-    let pts = parseInt(localStorage.getItem('pts')) || 0;
-    let canSpin = localStorage.getItem('canSpin') !== 'false';
-    let isSpinning = false;
-    let currentDeg = 0;
-
-    function switchTab(tabName, el) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById('tab-' + tabName).classList.add('active');
+    function go(t, el) {
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.nav div').forEach(function(x){ x.classList.remove('active'); });
+      document.getElementById('t-' + t).classList.add('active');
       el.classList.add('active');
     }
 
-    function updateUI() {
+    function ui() {
       document.getElementById('pts').innerText = pts;
-      document.getElementById('wPts').innerText = pts;
-      const spinBtn = document.getElementById('spinBtn');
-      if (canSpin) {
-        spinBtn.disabled = false;
-        spinBtn.innerText = "চাকা ঘোরান (Spin Now)";
-      } else {
-        spinBtn.disabled = true;
-        spinBtn.innerText = "স্পিন লক! নিচের অ্যাড দেখে আনলক করুন";
-      }
-      ['sub', 'like', 'comm', 'share'].forEach(t => {
-        if (localStorage.getItem('task_' + t) === 'done') {
-          const btn = document.getElementById('btn-' + t);
-          if (btn) { btn.disabled = true; btn.innerText = "সম্পন্ন"; }
+      var sb = document.getElementById('spinBtn');
+      sb.disabled = !canSpin;
+      sb.innerText = canSpin ? "Spin Now" : "Locked! Watch Ad to Spin";
+      ['sub','like','comm','share'].forEach(function(k){
+        if (localStorage.getItem('tk_' + k) === '1') {
+          var b = document.getElementById('b-' + k);
+          b.disabled = true;
+          b.innerText = "Done";
         }
       });
     }
-    updateUI();
+    ui();
 
-    function addPts(n) {
-      pts += n;
-      localStorage.setItem('pts', pts);
-      updateUI();
-    }
+    function add(n) { pts += n; localStorage.setItem('pts', pts); ui(); }
 
     function playSpin() {
-      if (isSpinning || !canSpin) return;
-      isSpinning = true;
-      const prizes =;
-      const weights =;
-      const idx = weights[Math.floor(Math.random() * weights.length)];
-      const won = prizes[idx];
-      const targetAngle = 360 - (idx * 45) - 22.5;
-      currentDeg += 1800 + targetAngle - (currentDeg % 360);
-      document.getElementById('wheel').style.transform = `rotate(${currentDeg}deg)`;
-
-      setTimeout(() => {
-        isSpinning = false;
+      if (spinning || !canSpin) return;
+      spinning = true;
+      var p = new Array(10, 20, 50, 100, 150, 200, 300, 500);
+      var w = new Array(0, 0, 0, 1, 1, 1, 2, 2, 3, 4);
+      var idx = w[Math.floor(Math.random() * w.length)];
+      var won = p[idx];
+      deg += 1800 + (360 - idx * 45 - 22.5) - (deg % 360);
+      document.getElementById('wheel').style.transform = "rotate(" + deg + "deg)";
+      setTimeout(function(){
+        spinning = false;
         canSpin = false;
         localStorage.setItem('canSpin', 'false');
-        addPts(won);
-        alert(`অভিনন্দন! আপনি স্পিন করে ${won} কয়েন জিতেছেন!\n\nআবার স্পিন করতে নিচের অ্যাড বাটনে ক্লিক করুন।`);
-      }, 3900);
+        add(won);
+        alert("Congrats! You won " + won + " coins!");
+      }, 3600);
     }
 
     function watchAd() {
-      if (window.Adsgram) {
-        const Ad = window.Adsgram.init({ blockId: BLOCK_ID });
-        Ad.show().then(() => {
-          canSpin = true;
-          localStorage.setItem('canSpin', 'true');
-          addPts(20);
-          alert("ধন্যবাদ! আপনি +২০ কয়েন পেয়েছেন এবং আপনার নতুন স্পিন আনলক হয়েছে!");
-        }).catch((result) => {
-          alert("বিজ্ঞপ্তি: " + (result.description || "অ্যাড এখনো অ্যাক্টিভ হয়নি বা লোড হচ্ছে না।"));
-        });
-      } else {
-        alert("Adsgram স্ক্রিপ্ট লোড হয়নি।");
-      }
+      if (!window.Adsgram) return alert("Adsgram not loaded.");
+      window.Adsgram.init({ blockId: BLOCK_ID }).show().then(function(){
+        canSpin = true;
+        localStorage.setItem('canSpin', 'true');
+        add(20);
+        alert("Awesome! +20 Coins & New Spin Unlocked!");
+      }).catch(function(e){
+        alert("Notice: " + (e.description || "Ad not active yet."));
+      });
     }
 
-    function doTask(type, reward) {
-      if (localStorage.getItem('task_' + type) === 'done') return;
-      tg.openTelegramLink(CHANNEL_LINK);
-      setTimeout(() => {
-        localStorage.setItem('task_' + type, 'done');
-        addPts(reward);
-        alert(`অভিনন্দন! টাস্ক সম্পন্ন করার জন্য +${reward} কয়েন যোগ হয়েছে।`);
+    function doTask(k, r) {
+      if (localStorage.getItem('tk_' + k) === '1') return;
+      tg.openTelegramLink(CH_LINK);
+      setTimeout(function(){
+        localStorage.setItem('tk_' + k, '1');
+        add(r);
+        alert("Task Done! +" + r + " Coins added.");
       }, 3000);
     }
 
-    function shareChannel() {
-      if (localStorage.getItem('task_share') === 'done') return;
-      const url = `https://t.me{encodeURIComponent(CHANNEL_LINK)}&text=${encodeURIComponent("দারুণ এই টেলিগ্রাম চ্যানেলে জয়েন করুন!")}`;
-      tg.openTelegramLink(url);
-      setTimeout(() => {
-        localStorage.setItem('task_share', 'done');
-        addPts(50);
-        alert("চ্যানেল শেয়ার করার জন্য +৫০ কয়েন যোগ হয়েছে!");
+    function shareCh() {
+      if (localStorage.getItem('tk_share') === '1') return;
+      tg.openTelegramLink(P + "t.me/share/url?url=" + encodeURIComponent(CH_LINK));
+      setTimeout(function(){
+        localStorage.setItem('tk_share', '1');
+        add(50);
+        alert("Shared! +50 Coins added.");
       }, 3000);
     }
 
-    function inviteFriend() {
-      const text = "Lucky Spin Arena গেমটি খেলুন এবং চাকা ঘুরিয়ে প্রতিদিন কয়েন জিতুন!";
-      const url = `https://t.me{encodeURIComponent(myRefLink)}&text=${encodeURIComponent(text)}`;
-      tg.openTelegramLink(url);
+    function invFr() {
+      tg.openTelegramLink(P + "t.me/share/url?url=" + encodeURIComponent(myRef));
     }
 
-    function copyRef() {
-      navigator.clipboard.writeText(myRefLink);
-      alert("আপনার রেফারেল লিংক কপি হয়েছে! বন্ধুদের সাথে শেয়ার করুন।");
+    function cpyRef() {
+      navigator.clipboard.writeText(myRef);
+      alert("Referral link copied!");
     }
 
     function doWd() {
-      const p = document.getElementById('phn').value;
-      const m = document.getElementById('mth').value;
-      if (pts < 100000) { alert("উইথড্র করার জন্য কমপক্ষে ১,০০,০০০ কয়েন প্রয়োজন!"); return; }
-      if (!p || p.length < 11) { alert("সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন!"); return; }
-      const msg = `নতুন উইথড্র রিকোয়েস্ট!\n\nনাম: ${userName} (ID: ${userId})\nমাধ্যম: ${m}\nনম্বর: ${p}\nকয়েন: ${pts}`;
-      if (BOT_TOKEN !== "YOUR_BOT_TOKEN" && CHAT_ID !== "YOUR_CHAT_ID") {
-        fetch(`https://telegram.org{BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}`);
+      var p = document.getElementById('phn').value;
+      var m = document.getElementById('mth').value;
+      if (pts < 100000) return alert("Minimum 100,000 coins required!");
+      if (!p || p.length < 11) return alert("Enter valid 11 digit number!");
+      var msg = "New Withdraw! Name: " + uname + " (" + uid + ") Method: " + m + " Number: " + p + " Coins: " + pts;
+      if (BOT_TOKEN !== "YOUR_BOT_TOKEN") {
+        fetch(P + "api.telegram.org/bot" + BOT_TOKEN + "/sendMessage?chat_id=" + CHAT_ID + "&text=" + encodeURIComponent(msg));
       }
-      addPts(-100000);
+      add(-100000);
       document.getElementById('phn').value = "";
-      alert("আপনার উইথড্র রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!");
+      alert("Withdraw request sent!");
     }
   </script>
 </body>
